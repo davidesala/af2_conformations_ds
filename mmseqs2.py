@@ -195,13 +195,15 @@ class MMSeqs2Runner:
     
     else:
       path = f"{ self.job }_env/templates_{ self.size }"
+      print("PATH = ", path)
       if not os.path.isdir( path ):
         os.mkdir( path )
       pdbs = ",".join( templates[ :max_templates ] )
       fetch_cmd = (
-        f"curl -v { self.template_url }{ pdbs }"
-        f" | tar xzf - -C { path }/"
-      ) 
+        f"wget -q -O - { self.template_url }{ pdbs }"
+        f" | tar -xzf - -C { path }/"
+      )
+      print("HERE: ", fetch_cmd ) 
       os.system( fetch_cmd )
       cp_cmd = (
         f"cp { path }/pdb70_a3m.ffindex "
