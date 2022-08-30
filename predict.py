@@ -132,24 +132,18 @@ def predict_structure_old(
   if use_templates and template_paths is not None:
     if n_template > 0:
       util.randomize_templates( template_paths, move_prefix, n_template )
-    tfeatures = util.mk_template( seq, a3m_lines, template_paths )
-    tfeatures_in = tfeatures.features
-    print( f"{ len( tfeatures.errors ) } errors with templates" )
-    print( f"{ len( tfeatures.warnings ) } warnings with templates" )
-    if len( tfeatures.errors ) > 0:
-      print( "Errors:" )
-      for error in tfeatures.errors:
-        print( f"\t{ error }" )
-    if len( tfeatures.warnings ) > 0:
-      print( "Warnings:" )
-      for warning in tfeatures.warnings:
-        print( f"\t{ warning }" )
+    tfeatures_in = util.setup_features(
+        seq, a3m_lines, util.mk_template(seq, a3m_lines, template_paths).features)
+#    tfeatures = util.mk_template( seq, a3m_lines, template_paths )
+#    tfeatures_in = tfeatures.features
+    #print( f"{ len( tfeatures_in.errors ) } errors with templates" )
+    #print( f"{ len( tfeatures_in.warnings ) } warnings with templates" )
   else:
     del template_paths # It is None if use_templates is false
     tfeatures_in = util.mk_mock_template( seq )
 
   # Assemble the dictionary of input features
-  features_in = util.setup_features( seq, a3m_lines, tfeatures_in )
+  #features_in = util.setup_features( seq, a3m_lines, tfeatures_in )
 
   # Run the models
   model_runner = set_config(
@@ -159,11 +153,11 @@ def predict_structure_old(
     max_recycles,
     model_id,
     n_struct_module_repeats,
-    len( features_in[ "msa" ] )
+    len( tfeatures_in[ "msa" ] )
   )
 
   features = model_runner.process_features(
-      features_in,
+      tfeatures_in,
       random_seed=random_seed
   )
 

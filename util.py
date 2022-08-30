@@ -7,6 +7,8 @@ import numpy as np
 
 from typing import NoReturn
 from alphafold.data import pipeline
+from alphafold.data import templates
+from alphafold.data.tools import hhsearch
 
 def pdb2str( pdbfile: str ) -> str:
 
@@ -158,12 +160,12 @@ def mk_template(
 
   """
 
-  result = alphafold.data.tools.hhsearch.HHSearch(
+  result = hhsearch.HHSearch(
       binary_path="hhsearch",
       databases=[ f"{ path }/pdb70" ]
   ).query( a3m_lines )
 
-  return alphafold.data.templates.TemplateHitFeaturizer(
+  return templates.HhsearchHitFeaturizer(
       mmcif_dir=path,
       max_template_date="2100-01-01",
       max_hits=20,
@@ -172,8 +174,8 @@ def mk_template(
       obsolete_pdbs_path=None
   ).get_templates(
       query_sequence=seq,
-      query_pdb_code=None,
-      query_release_date=None,
+      #query_pdb_code=None,
+      #query_release_date=None,
       hits=alphafold.data.pipeline.parsers.parse_hhr( result )
   )
 
@@ -197,7 +199,7 @@ def setup_features(
 
   """
 
-  msa, delmat = pipeline.parsers.parse_a3m( a3m_lines )
+  msa= pipeline.parsers.parse_a3m( a3m_lines )
 
   # Assemble the dictionary of input features
   return { **pipeline.make_sequence_features(
@@ -206,10 +208,9 @@ def setup_features(
             num_res = len( seq )
           ),
           **pipeline.make_msa_features(
-            msas = [ msa ],
-            deletion_matrices = [ delmat ]
+            msas = [ msa ]
           ),
-          **tfeatures_in
+          **tfeatures_in,
   }
 
 
